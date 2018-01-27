@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>Cypress System - Civil</title>
+
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<style> div#map {
+        height: 600px;
+        width: 1250px;
+        text-align:center;
+        margin: 0 auto 0 auto;
+        }
+        p{
+        vertical-align:top;
+        text-align:right;
+        }
+        h2{
+        text-align:center;
+	
+}
+.hidden{
+display: none;
+}	
+			
+</style>
+</head>
+<body>
+<img class="w3-image" src="http://cdn.callisonrtkl.com/wp-content/uploads/sites/1/2014/12/toronto-office.jpg" alt="Toronto" width="2000" height="800">
+<h2>Pinpoint Problem Location Below</h2>
+
+<div class="w3-top">
+  <div class="w3-bar w3-white w3-wide w3-padding w3-card-2">
+    <a href="index.html" class="w3-bar-item w3-button"><b>Cypress</b> System</a>
+    <!-- Float links to the right. Hide them on small screens -->
+    <div class="w3-right w3-hide-small">
+      <a href="about.html" class="w3-bar-item w3-button">About</a>
+    </div>
+  </div>
+</div>
+
+<form method="post" action="problem.php">
+
+<div align="center">
+<?php
+
+
+        $cookie = 1;
+        setcookie("count", $cookie);
+    }
+    else
+    {
+$cookie = ++$_COOKIE['count'];
+        setcookie("count", $cookie);
+        ?>
+</div>
+
+    <div id="map"></div>
+
+<!-- Header -->
+<header class="w3-display-container w3-content w3-wide" style="max-width:1500px;" id="home">
+
+  <div class="w3-display-middle w3-margin-top w3-center">
+    
+  </div>
+</header>
+
+<!-- Page content -->
+<div class="w3-content w3-padding" style="max-width:1564px">
+
+      <div id="form">
+      <form method="post" action="problem.php">
+      <table>
+      <tr><td class="hidden">Name:</td> <td><input type='text' name='name' class="hidden">  </td> </tr>
+      <tr><td class="hidden">Email:</td> <td><input type='text' name='email' class="hidden"> </td> </tr>
+      <tr><td class="hidden">Type:</td> <td class="hidden"><select name='type'> +
+                 <option value='Vandalization' SELECTED>Vandalization</option>
+                 <option value='Noise Complaint'>Noise Complaint</option>
+		 <option value='Potholes'>Potholes</option>
+		 <option value='Broken Sign'>Broken Sign</option>
+		 <option value='Flooding'>Flooding</option>
+		 <option value='Electrical'>Electrical</option>
+                 </select> </td></tr>
+		 <tr><td class="hidden">Description:</td> <td class="hidden"><input type='text' name='description'> </td> </tr>
+		 <tr><td class="hidden">Location:</td> <td class="hidden"><input type='text' name='location'> </td> </tr>
+		 <tr><td class="hidden">Latitude and Longitude:</td> <td class="hidden"><input type='text' name='lat' id="latlng2"> </td> </tr>
+                 <tr><td></td><td class="hidden"><input type='submit' value='Submit'></td></tr>
+      </table>
+      </form>
+    </div>
+    
+
+    <script>
+	var map;
+	var infowindow;
+	var messagewindow;
+	var marker;
+	var latLng;
+	
+      function initMap() {
+
+        var toronto = {lat: 43.65, lng: -79.38};
+        map = new google.maps.Map(document.getElementById('map'), {
+           zoom: 12,
+          center: toronto
+        });
+
+	infowindow = new google.maps.InfoWindow({
+
+          content: document.getElementById('form')
+	
+        })
+   
+        messagewindow = new google.maps.InfoWindow({
+          content: document.getElementById('message')
+        });
+
+        
+
+	  google.maps.event.addListener(map, 'click', function(event) {
+                
+          marker = new google.maps.Marker({
+            position: event.latLng,
+            map: map
+          });
+
+          	google.maps.event.addListener(marker, 'click', function() {
+		            
+            	infowindow.open(map, marker);
+		document.getElementById('latlng2').value = marker.getPosition();    
+    		var hidden=document.getElementsByClassName("hidden");
+
+	for (var i=0;i!=hidden.length;i++){
+		hidden[i].style.display="block";
+	}
+
+          		});
+                 
+        	});	
+
+
+        var script = document.createElement('script');
+ 	//script.src = 'https://www.scs.ryerson.ca/~cmferwor/406/data.js';
+        document.getElementsByTagName('head')[0].appendChild(script);
+
+	
+      	}
+
+function saveData() {
+        var name = escape(document.getElementById('name').value);
+        var address = escape(document.getElementById('address').value);
+        var type = document.getElementById('type').value;
+        var latlng = marker.getPosition();
+        var url = 'phpsqlinfo_addrow.php?name=' + name + '&address=' + address +
+                  '&type=' + type + '&lat=' + latlng.lat() + '&lng=' + latlng.lng();
+
+        downloadUrl(url, function(data, responseCode) {
+
+          if (responseCode == 200 && !(data.length > 1)) {
+            infowindow.close();
+            messagewindow.open(map, marker);
+          }
+        });
+      }
+
+      function downloadUrl(url, callback) {
+        var request = window.ActiveXObject ?
+            new ActiveXObject('Microsoft.XMLHTTP') :
+            new XMLHttpRequest;
+
+
+      request.onreadystatechange = function() {
+          if (request.readyState == 4) {
+            request.onreadystatechange = doNothing;
+            callback(request.responseText, request.status);
+          }
+        };
+
+        request.open('GET', url, true);
+        request.send(null);
+      }
+
+      function doNothing () {
+      }
+
+
+
+	window.eqfeed_callback = function(results) {
+        for (var i = 0; !(i > results.features.length-1); i++) {
+          var coords = results.features[i].geometry.coordinates;
+          latLng = new google.maps.LatLng(coords[1],coords[0]);
+          marker = new google.maps.Marker({
+            position: latLng,
+            map: map
+          });
+
+        }
+      	}
+
+    </script>
+    <script async defer
+ src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAD5M8OEfTE6Bz9zZupUKK0CdhBs5SPLuw&callback=initMap">
+    </script>
+
+</body>
+
+</html>
+
