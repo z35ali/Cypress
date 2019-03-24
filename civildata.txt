@@ -1,5 +1,5 @@
 
-zaf-password1
+Zaf-pass1
 malcom-pass2
 cassandra -pass3
 vojiSLAV-passwitha50
